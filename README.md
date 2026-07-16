@@ -1,3 +1,3 @@
 # brandonjabr.dev
 
-Personal Developer Website / App Support Page.
+Personal developer website / app support page.
