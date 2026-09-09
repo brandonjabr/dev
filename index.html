@@ -458,7 +458,7 @@
             far1a:"#2c3556", far1b:"#232c49", far2a:"#212a46", far2b:"#1a2038",
             mida:"#151b32", midb:"#0f1426", neara:"#0a0e1c", nearb:"#070912",
             tree:"#05070f", tree2:"#0b1019", animal:"#04060c",
-            rim:"rgba(255,200,150,0.8)", rim2:"rgba(255,196,150,0.72)", treeRim:"rgba(255,200,150,0.34)",
+            rim:"rgba(255,200,150,0.8)", rim2:"rgba(255,196,150,0.72)", treeRim:"rgba(255,205,155,0.22)",
             mist:(a)=>`rgba(120,140,180,${a})`, mote:(a)=>`rgba(255,200,120,${a})`, moteCore:(a)=>`rgba(255,244,210,${a})`,
             vig:"rgba(0,0,0,0.55)"
           };
@@ -469,7 +469,7 @@
             far1a:"#bccad2", far1b:"#aebfca", far2a:"#a0b3be", far2b:"#8fa6b2",
             mida:"#7c93a0", midb:"#6a8290", neara:"#576b74", nearb:"#475a63",
             tree:"#2a352f", tree2:"#37443c", animal:"#232c27",
-            rim:"rgba(255,240,200,0.85)", rim2:"rgba(255,246,220,0.7)", treeRim:"rgba(255,247,224,0.4)",
+            rim:"rgba(255,240,200,0.85)", rim2:"rgba(255,246,220,0.7)", treeRim:"rgba(255,248,228,0.26)",
             mist:(a)=>`rgba(246,249,245,${a})`, mote:(a)=>`rgba(255,240,190,${a})`, moteCore:(a)=>`rgba(255,255,246,${a})`,
             vig:"rgba(52,62,60,0.17)"
           };
@@ -493,7 +493,7 @@
           const y = (xs) => { const tt=(xs+MX)/(w+2*MX); const fi=Math.max(0,Math.min(seg,tt*seg)); const i=Math.floor(fi), f=fi-i; const a=arr[i], b=arr[Math.min(seg,i+1)]; const nrm=((a+(b-a)*f)-mn)/span*2-1; return baseY - nrm*amp; };
           return { y, base: baseY, top: baseY - amp };
         }
-        function mkTree(x, baseY, H){ const L=14, jag=[]; for(let i=0;i<L;i++) jag.push(0.6 + rng()*0.7); return { x, baseY, H, W: H*0.34, jag }; }
+        function mkTree(x, baseY, H){ const L=9, jag=[]; for(let i=0;i<L;i++) jag.push(0.9 + rng()*0.2); return { x, baseY, H, W: H*0.32, jag }; }
 
         function generate(){
           rng = mulberry32(seed);
@@ -538,26 +538,43 @@
           g.stroke(); g.restore();
         }
         function godRays(g){
-          g.save(); g.globalCompositeOperation = "lighter"; const oy = sun.y - h*0.12, n = 7;
-          for(let i=0;i<n;i++){ const ang=(i/(n-1)-0.5)*0.85 + 0.12, len=h*1.25, wd=(0.03+(i%2)*0.02)*w+18;
+          g.save(); g.globalCompositeOperation = "lighter"; const oy = sun.y, n = 9;
+          for(let i=0;i<n;i++){ const ang=(i/(n-1)-0.5)*1.05 - 0.28, len=h*1.5, wd=(0.03+(i%2)*0.02)*w+18;
             g.save(); g.translate(sun.x, oy); g.rotate(ang);
             const lg=g.createLinearGradient(0,0,0,len); lg.addColorStop(0,PAL.ray); lg.addColorStop(1,"rgba(0,0,0,0)");
             g.fillStyle=lg; g.beginPath(); g.moveTo(-wd*0.25,0); g.lineTo(wd*0.6,len); g.lineTo(-wd,len); g.closePath(); g.fill(); g.restore(); }
           g.restore();
         }
-        function redwoodShape(g, tr){
+        function redwoodBuild(g, tr){
           const H=tr.H, W=tr.W, jag=tr.jag, L=jag.length;
-          g.beginPath(); g.moveTo(-W*0.045,0); g.lineTo(W*0.045,0); g.lineTo(W*0.02,-H*0.3); g.lineTo(-W*0.02,-H*0.3); g.closePath(); g.fill();
-          g.beginPath(); g.moveTo(0,-H);
-          for(let i=0;i<L;i++){ const f=(i+1)/L, y=-H*(1-f*0.82), wd=(0.06+f*0.6)*W*0.5*jag[i]; g.lineTo(wd, y-H*0.01); g.lineTo(wd*0.6, y+H*0.016); }
-          g.lineTo(0,-H*0.16);
-          for(let i=L-1;i>=0;i--){ const f=(i+1)/L, y=-H*(1-f*0.82), wd=(0.06+f*0.6)*W*0.5*jag[i]; g.lineTo(-wd*0.6, y+H*0.016); g.lineTo(-wd, y-H*0.01); }
-          g.closePath(); g.fill();
+          g.moveTo(-W*0.05,0); g.lineTo(W*0.05,0); g.lineTo(W*0.015,-H*0.6); g.lineTo(-W*0.015,-H*0.6); g.closePath();
+          for(let i=0;i<L;i++){
+            const f=i/(L-1);
+            const cy=-H*(0.2 + f*0.76);
+            const wid=W*0.5*(1-f*0.5)*(0.92+jag[i]*0.16);
+            const layerH=H*(0.19-f*0.06);
+            const droop=H*0.032*(1-f*0.4);
+            g.moveTo(0, cy-layerH);
+            g.quadraticCurveTo(wid*0.5, cy-layerH*0.35, wid, cy+droop);
+            g.quadraticCurveTo(wid*0.5, cy+droop*0.7, 0, cy+droop);
+            g.quadraticCurveTo(-wid*0.5, cy+droop*0.7, -wid, cy+droop);
+            g.quadraticCurveTo(-wid*0.5, cy-layerH*0.35, 0, cy-layerH);
+            g.closePath();
+          }
         }
+        function redwoodShape(g, tr){ g.beginPath(); redwoodBuild(g, tr); g.fill(); }
         function drawTree(g, tr, color){
-          const ox = Math.max(1, tr.W*0.03) * ((sun.x-tr.x)>=0?1:-1), oy = Math.max(1, tr.H*0.008);
-          g.save(); g.translate(tr.x+ox, tr.baseY-oy); g.fillStyle = PAL.treeRim; redwoodShape(g, tr); g.restore();
-          g.save(); g.translate(tr.x, tr.baseY); g.fillStyle = color; redwoodShape(g, tr); g.restore();
+          g.save(); g.translate(tr.x, tr.baseY);
+          g.fillStyle = color; redwoodShape(g, tr);
+          // soft sunward highlight, clipped to the tree so it never bleeds into the sky
+          g.beginPath(); redwoodBuild(g, tr); g.clip();
+          g.globalCompositeOperation = "lighter";
+          const dir = (sun.x-tr.x)>=0 ? 1 : -1;
+          const hx = dir*tr.W*0.24, hy = -tr.H*0.7;
+          const rg = g.createRadialGradient(hx, hy, 0, hx, hy, tr.H*0.6);
+          rg.addColorStop(0, PAL.treeRim); rg.addColorStop(1, "rgba(0,0,0,0)");
+          g.fillStyle = rg; g.fillRect(-tr.W, -tr.H*1.1, tr.W*2, tr.H*1.1);
+          g.restore();
         }
         function bearShape(g){
           // legs (short, thick) + belly bridge so it reads grounded
@@ -599,7 +616,7 @@
 
         function build(){
           DARKQ = isDark(); PAL = palette(DARKQ); LW = w+2*MX; LH = h+2*MY;
-          sun = { x:w*0.72, y:h*(DARKQ?0.44:0.4) };
+          sun = { x:w*0.84, y:h*0.12 };
           layerA = mkLayer(); layerB = mkLayer(); layerC = mkLayer();
           const gA = layerA.g;
           const sky = gA.createLinearGradient(0,-MY,0,h+MY); PAL.sky.forEach(s=>sky.addColorStop(s[1],s[0])); gA.fillStyle=sky; gA.fillRect(-MX,-MY,LW,LH);
@@ -614,9 +631,7 @@
           const gC = layerC.g;
           mountain(gC, geo.near, PAL.neara, PAL.nearb); rimLine(gC, geo.near, PAL.rim, 0.85);
           for(const tr of geo.ridgeTrees) drawTree(gC, tr, PAL.tree2);
-          drawCreature(gC, wolfShape, geo.wolf);
           for(const tr of geo.frontTrees) drawTree(gC, tr, PAL.tree);
-          drawCreature(gC, bearShape, geo.bear);
           // mote sprite (baked once per theme for cheap particles)
           moteSprite = document.createElement("canvas"); moteSprite.width = moteSprite.height = 64;
           const mg = moteSprite.getContext("2d"); const mgr = mg.createRadialGradient(32,32,0,32,32,32);
