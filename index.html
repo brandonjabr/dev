@@ -237,10 +237,12 @@
     .app-header img { width: 78px; height: 78px; border-radius: 20px; box-shadow: var(--shadow); }
     .app-header h2 { font-size: 2rem; }
     .badge {
-      display: inline-flex; align-items: center; gap: 7px; margin-top: 6px;
-      padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 8px;
+      padding: 7px 16px; border-radius: 999px; font-size: 0.95rem; font-weight: 600;
       background: var(--accent-soft); color: var(--accent);
+      transition: transform 0.2s var(--ease), background 0.2s, color 0.2s, box-shadow 0.3s;
     }
+    a.badge:hover { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; transform: translateY(-2px); box-shadow: 0 12px 26px -12px var(--glow); }
     .app-info > p { color: var(--text-dim); font-size: 1.05rem; margin-bottom: 22px; }
     .features { list-style: none; display: grid; gap: 12px; }
     .features li { display: flex; align-items: flex-start; gap: 11px; font-size: 0.98rem; }
@@ -352,6 +354,7 @@
         tagline: "Split any bill in seconds",
         icon: "assets/evensplit-icon.jpg",
         color: "#22c55e",
+        url: "https://apps.apple.com/us/app/evensplit-scan-split-bills/id6788140856",
         blurb: "Snap a photo of any receipt and EvenSplit reads the line items for you, then divides the bill fairly across the table — taxes, tip and all. No more mental math or awkward moments at dinner.",
         features: [
           "Scan receipts with the camera — items detected automatically",
@@ -367,6 +370,7 @@
         tagline: "A drum kit in your pocket",
         icon: "assets/backbeat-icon.jpg",
         color: "#14b8a6",
+        url: "https://apps.apple.com/us/app/backbeat-drum-beat-trainer/id6789242500",
         blurb: "A responsive virtual drum kit and pattern player. Tap out grooves on real-feeling pads, follow built-in patterns like Four on the Floor, and lock everything to a precise metronome from 40 to 240 BPM.",
         features: [
           "Expressive, low-latency drum pads — kick, snare, toms, cymbals",
@@ -571,7 +575,7 @@
                   <img src={a.icon} alt={a.name + " icon"} />
                   <div>
                     <h2>{a.name}</h2>
-                    <span className="badge"><IconApple /> Now available on the App Store</span>
+                    <a className="badge" href={a.url} target="_blank" rel="noopener"><IconApple /> Available now on the App Store</a>
                   </div>
                 </div>
                 <p>{a.blurb}</p>
