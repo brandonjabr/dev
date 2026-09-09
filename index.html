@@ -460,7 +460,7 @@
             tree:"#05070f", tree2:"#0b1019", animal:"#04060c",
             rim:"rgba(255,200,150,0.8)", rim2:"rgba(255,196,150,0.72)", treeRim:"rgba(255,205,155,0.22)",
             mist:(a)=>`rgba(120,140,180,${a})`, mote:(a)=>`rgba(255,200,120,${a})`, moteCore:(a)=>`rgba(255,244,210,${a})`,
-            vig:"rgba(0,0,0,0.55)"
+            bird:"rgba(206,212,232,0.34)", vig:"rgba(0,0,0,0.55)"
           };
           return {
             sky:[["#b9d4e2",0],["#d7e2df",0.38],["#efe6d2",0.66],["#f7ecd4",0.85],["#fbeed2",1]],
@@ -471,7 +471,7 @@
             tree:"#2a352f", tree2:"#37443c", animal:"#232c27",
             rim:"rgba(255,240,200,0.85)", rim2:"rgba(255,246,220,0.7)", treeRim:"rgba(255,248,228,0.26)",
             mist:(a)=>`rgba(246,249,245,${a})`, mote:(a)=>`rgba(255,240,190,${a})`, moteCore:(a)=>`rgba(255,255,246,${a})`,
-            vig:"rgba(52,62,60,0.17)"
+            bird:"rgba(55,65,72,0.5)", vig:"rgba(52,62,60,0.17)"
           };
         }
 
@@ -623,7 +623,6 @@
           if(DARKQ){ for(const st of geo.stars){ gA.globalAlpha=st.a; gA.fillStyle="#e6ecff"; gA.beginPath(); gA.arc(st.x,st.y,st.r,0,TAU); gA.fill(); } gA.globalAlpha=1; }
           const sg = gA.createRadialGradient(sun.x,sun.y,0,sun.x,sun.y,Math.max(w,h)*0.6); sg.addColorStop(0,PAL.sun0); sg.addColorStop(0.1,PAL.sun1); sg.addColorStop(0.4,PAL.sun2); sg.addColorStop(1,"rgba(0,0,0,0)"); gA.fillStyle=sg; gA.fillRect(-MX,-MY,LW,LH);
           gA.fillStyle=PAL.sunDisk; gA.beginPath(); gA.arc(sun.x,sun.y,Math.min(w,h)*0.045,0,TAU); gA.fill();
-          godRays(gA);
           mountain(gA, geo.far1, PAL.far1a, PAL.far1b);
           mountain(gA, geo.far2, PAL.far2a, PAL.far2b);
           rimLine(gA, geo.far2, PAL.rim, 0.3);
@@ -650,6 +649,32 @@
           g.globalAlpha=1; g.restore();
         }
 
+        // ---------- birds (simple shadowy silhouettes crossing at random intervals) ----------
+        let birds = [], nextSpawn = 2 + Math.random()*3;
+        function spawnFlock(){
+          const dir = Math.random()<0.5 ? 1 : -1;
+          const n = 2 + Math.floor(Math.random()*4);
+          const baseY = h*(0.1 + Math.random()*0.3);
+          const s = Math.max(7, h*(0.013 + Math.random()*0.012));
+          const speed = (0.7 + Math.random()*0.7) * dir;
+          const startX = dir>0 ? -50 : w+50;
+          for(let i=0;i<n;i++) birds.push({ x:startX - dir*(i*s*2.4) - dir*Math.random()*24, y:baseY + (i-n/2)*s*1.1 + (Math.random()-0.5)*s, s:s*(0.85+Math.random()*0.3), vx:speed, dir, ph:Math.random()*TAU, flap:0.16+Math.random()*0.09 });
+        }
+        function drawBird(g, b){
+          const flap = Math.sin(b.ph)*0.5 + 0.5;   // 0..1
+          const humpY = -b.s*0.5;                    // fixed mid-wing bend
+          const tipY = -b.s*(0.02 + 0.16*flap);      // wingtips flap up/down (subtle)
+          g.save(); g.translate(b.x, b.y); g.scale(b.dir, 1);
+          g.strokeStyle = PAL.bird; g.lineWidth = Math.max(1.4, b.s*0.13); g.lineCap = "round"; g.lineJoin = "round";
+          g.beginPath(); g.moveTo(-b.s, tipY); g.quadraticCurveTo(-b.s*0.4, humpY, 0, -b.s*0.05); g.quadraticCurveTo(b.s*0.4, humpY, b.s, tipY); g.stroke();
+          g.restore();
+        }
+        function updateBirds(g){
+          if(t >= nextSpawn){ spawnFlock(); nextSpawn = t + 7 + Math.random()*13; }
+          for(let i=birds.length-1;i>=0;i--){ const b=birds[i]; b.x += b.vx; b.ph += b.flap; b.y += Math.sin(t*0.7 + b.ph)*0.12;
+            if((b.dir>0 && b.x>w+70) || (b.dir<0 && b.x<-70)) birds.splice(i,1); else drawBird(g, b); }
+        }
+
         // ---------- interaction + loop ----------
         let px=0.5, py=0.4, tpx=0.5, tpy=0.4, active=false;
         const move = (e) => { const r=canvas.getBoundingClientRect(); const p=e.touches?e.touches[0]:e; tpx=(p.clientX-r.left)/w; tpy=(p.clientY-r.top)/h; active=true; };
@@ -667,6 +692,7 @@
           drawMist(ctx, geo.mistMid, -nx*14, -ny*7);
           ctx.drawImage(layerC.c, -MX + (-nx*26), -MY + (-ny*12), LW, LH);
           drawMist(ctx, geo.mistLow, -nx*26, -ny*12);
+          updateBirds(ctx);
           drawParticles(ctx);
           ctx.fillStyle=vignette; ctx.fillRect(0,0,w,h);
           if(!reduce) raf=requestAnimationFrame(frame);
